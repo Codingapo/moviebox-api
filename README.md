@@ -32,11 +32,14 @@ Stripped from the original Node server:
 | `/zdetail/{detailPath}` | GET | **Watch payload** (seasons, episodes, embeds) |
 | `/watch/{detailPath}` | GET | Alias of `/zdetail` |
 
-Interactive docs: `/docs` (Swagger) and `/redoc`.
+Interactive docs:
+
+- `/docs` — Swagger UI
+- `/redoc` — ReDoc
 
 ---
 
-## Watch / detail response shape
+# Watch / detail response shape
 
 `GET /zdetail/{detailPath}` or `GET /watch/{detailPath}` returns a structure suitable for a watch page:
 
@@ -50,7 +53,10 @@ Interactive docs: `/docs` (Swagger) and `/redoc`.
     { "season": 2, "episodes": 10 }
   ],
   "season_count": 2,
-  "language_availability": { "sub_episodes": 0, "dub_episodes": 0 },
+  "language_availability": {
+    "sub_episodes": 0,
+    "dub_episodes": 0
+  },
   "languages": [
     {
       "subjectId": "...",
@@ -84,149 +90,3 @@ Interactive docs: `/docs` (Swagger) and `/redoc`.
     }
   ]
 }
-```
-
-Movies get a single episode entry with season `0` and movie-level `embed_url`.
-
-Fields like `jp_title` and local `/watch/...` path strings are **not** included; only `embed_url.hd-1` / `hd-2` are used for playback.
-
----
-
-## Local development
-
-### Requirements
-
-- Python 3.10+
-- `pip`
-
-### Setup
-
-```bash
-git clone <your-repo-url>
-cd moviebox-api
-
-python -m venv .venv
-# Windows: .venv\Scripts\activate
-source .venv/bin/activate
-
-pip install -r requirements.txt
-cp .env.example .env   # optional; edit if needed
-```
-
-### Run
-
-```bash
-uvicorn app:app --host 0.0.0.0 --port 8000 --reload
-```
-
-Open:
-
-- API: http://localhost:8000  
-- Docs: http://localhost:8000/docs  
-- Health: http://localhost:8000/health  
-
-### Quick examples
-
-```bash
-# Clean home
-curl -s http://localhost:8000/api/clean | head -c 400
-
-# Search
-curl -s -X POST http://localhost:8000/search \
-  -H "Content-Type: application/json" \
-  -d '{"keyword":"avatar","page":1,"perPage":12}'
-
-# Trending
-curl -s "http://localhost:8000/trending?page=1&perPage=10"
-
-# Genre
-curl -s "http://localhost:8000/genre/action?type=movie&page=1&perPage=12"
-
-# Watch detail (series or movie)
-curl -s "http://localhost:8000/zdetail/rick-and-morty-aPze2KlOcN2"
-```
-
----
-
-## Environment variables
-
-See `.env.example`. All are optional.
-
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `SUPAPLAY_PUBLIC_BASE` | `https://supaplay.fun` | Base for embed links |
-| `MOVIEBOX_DETAIL_API` | aoneroom detail URL | Detail by `detailPath` |
-| `SEARCH_API_DOMAIN` | `h5-api.aoneroom.com` | Search + token |
-| `MOVIEWATCH_MOVIES_CHANNEL_ID` | `1` | Genre filter (movies) |
-| `MOVIEWATCH_TV_CHANNEL_ID` | `2` | Genre filter (TV) |
-| `UPSTREAM_TIMEOUT` | `20` | HTTP timeout (seconds) |
-| `DETAIL_TIMEOUT` | `22` | Detail timeout |
-| `CORS_ORIGINS` | `*` | Comma-separated origins |
-
----
-
-## Deploy on Render
-
-1. Push this repo to GitHub.
-2. [Render](https://render.com) → **New** → **Web Service** → connect the repo.
-3. Settings:
-   - **Runtime**: Python
-   - **Build command**: `pip install -r requirements.txt`
-   - **Start command**: `uvicorn app:app --host 0.0.0.0 --port $PORT`
-4. Optional: set env vars from the table above.
-5. Deploy. Health check path: `/health`.
-
-You can also use the included `render.yaml` (Blueprint):
-
-```bash
-# In Render dashboard: New → Blueprint → select this repo
-```
-
----
-
-## Deploy on Vercel
-
-1. Install [Vercel CLI](https://vercel.com/docs/cli) or use the dashboard.
-2. From the project root:
-
-```bash
-npm i -g vercel   # if needed
-vercel
-```
-
-3. `vercel.json` routes all traffic to `app.py` via `@vercel/python`.
-4. Set any env vars in the Vercel project settings.
-5. After deploy, open `https://<project>.vercel.app/health`.
-
-**Note:** Vercel serverless has a max duration on the free plan. Catalog calls are short; if you hit limits, raise the function timeout in the project settings or use Render for longer upstream waits.
-
----
-
-## Project layout
-
-```
-moviebox-api/
-├── app.py              # FastAPI application (all routes)
-├── requirements.txt
-├── Procfile            # Render / Heroku-style process
-├── render.yaml         # Render Blueprint
-├── vercel.json         # Vercel routing
-├── .env.example
-├── .gitignore
-└── README.md
-```
-
----
-
-## Notes
-
-- Domain discovery tries several MovieBox mirror hosts and caches a working one for a few minutes.
-- Genre responses are cached in-process for ~60s.
-- Upstream APIs can change; if search or home fails, check domain / headers and update env vars.
-- This service only exposes **metadata and embed URLs**. Actual video delivery is handled by Supaplay (or whatever you set in `SUPAPLAY_PUBLIC_BASE`).
-
----
-
-## License
-
-Use at your own risk. Respect the terms of any upstream content providers and local copyright law.
