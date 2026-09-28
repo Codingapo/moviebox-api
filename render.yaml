@@ -9,4 +9,4 @@ services:
       - key: SUPAPLAY_PUBLIC_BASE
         value: https://supaplay.fun
       - key: PYTHON_VERSION
-        value: "3.12.0"
+        value: "3.13.7"
