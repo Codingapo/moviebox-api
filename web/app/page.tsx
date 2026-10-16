@@ -4,6 +4,8 @@ import { AnimeCard } from "@/components/anime-card";
 import { getHome } from "@/lib/anime-api/client";
 import { createClient } from "@/lib/supabase/server";
 
+export const dynamic = "force-dynamic";
+
 async function getContinueWatching() {
   try {
     const supabase = await createClient();
