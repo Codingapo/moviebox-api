@@ -1,19 +1,36 @@
 import { z } from "zod";
 
-const cardSchema = z.object({
-  id: z.union([z.string(), z.number()]).transform(String),
-  data_id: z.union([z.string(), z.number()]).optional().transform(v => v == null ? undefined : String(v)),
-  poster: z.string().optional(),
-  title: z.string().default("Untitled"),
-  jname: z.string().optional(),
-  url: z.string().optional(),
+const idValue = z.union([z.string(), z.number()]);
+
+export const cardSchema = z.object({
+  id: idValue.optional(),
+  data_id: idValue.optional(),
+  slug: z.string().optional().nullable(),
+  poster: z.string().optional().nullable(),
+  image: z.string().optional().nullable(),
+  title: z.string().optional().nullable(),
+  jname: z.string().optional().nullable(),
+  japaneseTitle: z.string().optional().nullable(),
+  url: z.string().optional().nullable(),
+  type: z.string().optional().nullable(),
   tvInfo: z.object({
-    showType: z.string().optional(),
-    sub: z.coerce.number().optional(),
-    dub: z.coerce.number().optional(),
-    eps: z.coerce.number().optional(),
-  }).optional(),
+    showType: z.string().optional().nullable(),
+    sub: z.union([z.string(), z.number()]).optional().nullable(),
+    dub: z.union([z.string(), z.number()]).optional().nullable(),
+    eps: z.union([z.string(), z.number()]).optional().nullable(),
+  }).optional().nullable(),
+  episodes: z.union([
+    z.object({
+      sub: z.union([z.string(), z.number()]).optional().nullable(),
+      dub: z.union([z.string(), z.number()]).optional().nullable(),
+      total: z.union([z.string(), z.number()]).optional().nullable(),
+    }).passthrough(),
+    z.string(),
+    z.number(),
+    z.null(),
+  ]).optional(),
   adultContent: z.boolean().optional(),
+  isAdult: z.boolean().optional(),
 }).passthrough();
 
 export const homeSchema = z.object({
@@ -30,24 +47,6 @@ export const homeSchema = z.object({
 }).passthrough();
 
 export const genreSchema = z.any();
-export const seriesSchema = z.object({
-  slug: z.string().optional(),
-  series_id: z.union([z.string(), z.number()]).optional(),
-  title: z.string().optional(),
-  native: z.string().optional(),
-  poster: z.string().optional(),
-  description: z.string().optional(),
-  score: z.union([z.string(), z.number()]).optional(),
-  mal_id: z.union([z.string(), z.number()]).optional(),
-  ani_id: z.union([z.string(), z.number()]).optional(),
-  background_image: z.string().optional(),
-  status: z.string().optional(),
-  year: z.union([z.string(), z.number()]).optional(),
-  duration: z.union([z.string(), z.number()]).optional(),
-  language_availability: z.object({
-    sub_episodes: z.coerce.number().optional().default(0),
-    dub_episodes: z.coerce.number().optional().default(0),
-  }).optional().default({ sub_episodes: 0, dub_episodes: 0 }),
-}).passthrough();
+export const seriesSchema = z.any();
 
 export type RawAnimeCard = z.infer<typeof cardSchema>;
