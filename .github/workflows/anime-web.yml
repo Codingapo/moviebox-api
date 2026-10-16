@@ -1,0 +1,30 @@
+name: AnimeVerse Web CI
+
+on:
+  push:
+    branches:
+      - anime-platform
+  pull_request:
+    paths:
+      - "web/**"
+      - ".github/workflows/anime-web.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    env:
+      NEXT_PUBLIC_ANIME_API_BASE: https://anime.supaplay.fun
+      NEXT_PUBLIC_MOVIE_API_BASE: https://movie.supaplay.fun
+      NEXT_PUBLIC_SUPABASE_URL: https://kohpxptbgwwmtjwfwglu.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable__JUjbjJBexgUS2dmEsyGfg_24IZ0X-b
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npm run build
