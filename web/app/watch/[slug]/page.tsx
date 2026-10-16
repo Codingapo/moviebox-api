@@ -52,6 +52,7 @@ export default async function WatchPage({
             title={`${anime.title} episode ${ep}`}
             className="h-full w-full"
             allow="autoplay; fullscreen; picture-in-picture"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"
             allowFullScreen
             referrerPolicy="strict-origin-when-cross-origin"
           />
